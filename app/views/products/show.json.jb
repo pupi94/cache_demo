@@ -1,0 +1,11 @@
+# frozen_string_literal: true
+
+{
+  product: {
+    id: @product.id,
+    title: @product.title,
+    description: @product.description,
+    created_at: @product.created_at.utc.iso8601,
+    updated_at: @product.updated_at.utc.iso8601
+  }
+}

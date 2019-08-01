@@ -10,11 +10,15 @@ module CacheHelper
   def fetch_cache
     if cache_mapping
       if cache_mapping.hit?
+        Rails.logger.info("============ Hit cache : #{cache_mapping.key}")
+
         response.body = cache_mapping.read
         response.content_type = "application/json"
       else
         yield
         cache_mapping.write(response.body) if response.ok?
+
+        Rails.logger.info("============ Write cache : #{cache_mapping.key}")
       end
     else
       yield

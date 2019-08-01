@@ -15,11 +15,15 @@ class ApplicationCacheMapping
   end
 
   def write(data)
-    Rails.cache.write(key_by_action, data)
+    Rails.cache.write(key, data)
   end
 
   def read
-    @data ||= Rails.cache.read(key_by_action)
+    @data ||= Rails.cache.read(key)
+  end
+
+  def key
+    @key ||= self.send(params[:action].to_sym)
   end
 
   private
@@ -29,9 +33,5 @@ class ApplicationCacheMapping
 
     def action_info
       "#{params[:controller]}:#{params[:action]}:#{params[:format]}:#{extra_options.to_query}"
-    end
-
-    def key_by_action
-      @key ||= self.send(params[:action].to_sym)
     end
 end
