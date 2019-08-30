@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
 {
-  count: @count,
+  count: @products.count,
   products: @products.as_json(only: %i[id title])
 }
