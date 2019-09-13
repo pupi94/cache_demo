@@ -1,7 +1,7 @@
 ![](https://l.ruby-china.com/photo/2019/dfa43de9-83cb-460f-8629-33a738c1ef14.png!large)
 
 #### 清理缓存时的性能问题
-在第一版的代码中，数据有改变时我是用 `Rails.cache.delete_matched("products/*")` 来清理相关的缓存的
+在第一版的代码中，数据更新后我是用 `Rails.cache.delete_matched("products/*")` 来清理相关的缓存的，以下是 RedisCacheStore 中 delete_matched 方法的代码
 
 ```ruby
  def delete_matched(matcher, options = nil)
@@ -22,7 +22,7 @@
     end
   end
 ```
-通过查看 RedisCacheStore 中 delete_matched 方法的代码可以知道它会不断迭代并匹配相关的key，直到遍历完整个数据库。
-当数据量比较大时，会执行相当长的时间，导致api超时。比如有5万个数据，这里就会执行50次 `scan` 。
+它会不断迭代并匹配相关的key，直到遍历完整个数据库。
+当数据量比较大时，比如有5万个数据，这里就会执行50000/1000 = 50次 `scan`，会执行相当长的时间，导致api超时。
 
-因此这里进行了如下优化，写入 cache 的同时将 cache key 存储到 redis set，清理 cache 时将 redis set 中的 cache key 取出来然后删除对应 key 的缓存
+因此改进了一下清理缓存的逻辑，写入 cache 的同时将 cache key 存储到 redis set，清理 cache 时将 redis set 中的 cache key 取出来然后删除对应 key 的缓存
