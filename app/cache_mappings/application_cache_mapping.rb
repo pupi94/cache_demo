@@ -16,22 +16,19 @@ class ApplicationCacheMapping
 
   def write(data)
     Rails.cache.write(key_by_action, data)
-    Rails.cache.redis.sadd(redis_set_key, key_by_action)
   end
 
   def read
-    @data ||= Rails.cache.read(key)
-  end
-
-  def key
-    @key ||= self.send(params[:action].to_sym)
+    @result ||= Rails.cache.read(key_by_action)
   end
 
   class << self
-    def delete_matched(key)
-      keys = Rails.cache.redis.smembers("#{key}::key_set")
-      keys << key
-      Rails.cache.redis.del(keys)
+    def increase_version(key_prefix)
+      Rails.cache.redis.with { |con| con.incr(version_key(key_prefix)) }
+    end
+
+    def version_key(key_prefix)
+      "#{key_prefix}::version"
     end
   end
 
@@ -45,14 +42,14 @@ class ApplicationCacheMapping
     end
 
     def key_by_action
-      @key ||= "#{key_prefix}/#{action_info}/#{request_params}"
+      @key ||= "#{key_prefix}/#{version}/#{action_info}/#{request_params}"
     end
 
     def key_prefix
       @key_prefix ||= self.send(params[:action].to_sym)
     end
 
-    def redis_set_key
-      @redis_set_key ||= "#{key_prefix}::key_set"
+    def version
+      Rails.cache.read(self.class.version_key(key_prefix))
     end
 end

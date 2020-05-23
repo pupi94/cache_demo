@@ -13,8 +13,8 @@ class ProductsCacheMapping < ApplicationCacheMapping
     def clear(product_id)
       Rails.logger.info("============ Clear products cache : #{product_id}")
 
-      delete_matched("products")
-      delete_matched("product:#{product_id}")
+      increase_version("products")
+      increase_version("product:#{product.id}")
     end
   end
 end
