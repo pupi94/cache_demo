@@ -24,7 +24,7 @@ class ApplicationCacheMapping
 
   class << self
     def increase_version(key_prefix)
-      Rails.cache.redis.with { |con| con.incr(version_key(key_prefix)) }
+      Rails.cache.increment(version_key(key_prefix), 1, expires_in: 3.day)
     end
 
     def version_key(key_prefix)
